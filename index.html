@@ -115,7 +115,7 @@
           .map(referral => `<p>${referral.referralId}: ${referral.points.toFixed(4)} $AFK (Доход: ${referral.earnings.toFixed(4)} $AFK)</p>`)
           .join('');
         copyLinkButton.onclick = () => {
-          const referralLink = `https://t.me/AFKCoinBot?start=${userId}`;
+          const referralLink = `https://t.me/AFK2earn_bot?start=${userId}`;
           navigator.clipboard.writeText(referralLink).then(() => {
             copyMessage.classList.remove('hidden');
             setTimeout(() => copyMessage.classList.add('hidden'), 2000);
