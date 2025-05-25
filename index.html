@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+     <html lang="ru">
+     <head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>AFK Coin</title>
+       <script src="https://telegram.org/js/telegram-web-app.js"></script>
+       <script src="https://cdn.tailwindcss.com"></script>
+       <style>
+         body {
+           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+           margin: 0;
+           background-color: #f5f5f5;
+         }
+         .tab-content {
+           display: none;
+           padding: 20px;
+           text-align: center;
+         }
+         .tab-content.active {
+           display: block;
+         }
+         .tab-button {
+           flex: 1;
+           padding: 10px;
+           text-align: center;
+           background-color: #e0e0e0;
+           cursor: pointer;
+         }
+         .tab-button.active {
+           background-color: #d0d0d0;
+         }
+       </style>
+     </head>
+     <body>
+       <div id="main-content" class="tab-content active">
+         <h1 class="text-4xl font-bold text-gray-800 mb-4">Баланс</h1>
+         <p class="text-3xl text-gray-600"><span id="points">0.0000</span> $AFK</p>
+       </div>
+       <div id="leaderboard-content" class="tab-content">
+         <h1 class="text-4xl font-bold text-gray-800 mb-4">Топ</h1>
+         <div id="leaderboard" class="text-left"></div>
+       </div>
+       <div id="referrals-content" class="tab-content">
+         <h1 class="text-4xl font-bold text-gray-800 mb-4">Мои рефералы</h1>
+         <div id="referrals-list"></div>
+         <button id="copy-link" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Скопировать реферальную ссылку</button>
+         <p id="copy-message" class="mt-2 text-green-500 hidden">Ссылка скопирована!</p>
+       </div>
+       <div class="flex fixed bottom-0 w-full bg-gray-200">
+         <div class="tab-button active" onclick="openTab('main')">Главная</div>
+         <div class="tab-button" onclick="openTab('leaderboard')">Топ</div>
+         <div class="tab-button" onclick="openTab('referrals')">Рефералы</div>
+       </div>
+
+       <script>
+         const tg = window.Telegram.WebApp;
+         tg.ready();
+         tg.expand();
+
+         const userId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : Date.now().toString();
+         const pointsElement = document.getElementById('points');
+         const leaderboardElement = document.getElementById('leaderboard');
+         const referralsListElement = document.getElementById('referrals-list');
+         const copyLinkButton = document.getElementById('copy-link');
+         const copyMessage = document.getElementById('copy-message');
+         const serverUrl = 'https://telegram-bot-server-1rsd.onrender.com'; // Замените на ваш URL Render
+
+         function openTab(tabName) {
+           document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+           document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+           document.getElementById(`${tabName}-content`).classList.add('active');
+           document.querySelector(`.tab-button[onclick="openTab('${tabName}')"]`).classList.add('active');
+         }
+
+         async function fetchUserData() {
+           try {
+             const response = await fetch(`${serverUrl}/user/${userId}`);
+             const data = await response.json();
+             pointsElement.textContent = data.points.toFixed(4);
+           } catch (error) {
+             console.error('Error fetching user data:', error);
+             pointsElement.textContent = '0.0000';
+           }
+         }
+
+         async function fetchLeaderboard() {
+           try {
+             const response = await fetch(`${serverUrl}/leaderboard`);
+             const data = await response.json();
+             leaderboardElement.innerHTML = data.map((user, index) => `<p>${index + 1}. ${user.userId}: ${user.points.toFixed(4)} $AFK</p>`).join('');
+           } catch (error) {
+             console.error('Error fetching leaderboard:', error);
+             leaderboardElement.innerHTML = '<p>Ошибка загрузки топа</p>';
+           }
+         }
+
+         async function fetchReferrals() {
+           try {
+             const response = await fetch(`${serverUrl}/referrals/${userId}`);
+             const data = await response.json();
+             referralsListElement.innerHTML = data.referrals.map(referral => `<p>${referral.referralId}: ${referral.points.toFixed(4)} $AFK</p>`).join('');
+             copyLinkButton.onclick = () => {
+               const referralLink = `${serverUrl}/refer/${userId}`;
+               navigator.clipboard.writeText(referralLink).then(() => {
+                 copyMessage.classList.remove('hidden');
+                 setTimeout(() => copyMessage.classList.add('hidden'), 2000);
+               });
+             };
+           } catch (error) {
+             console.error('Error fetching referrals:', error);
+             referralsListElement.innerHTML = '<p>Ошибка загрузки рефералов</p>';
+           }
+         }
+
+         // Инициализация
+         fetchUserData();
+         fetchLeaderboard();
+         fetchReferrals();
+         setInterval(fetchUserData, 1500);
+         setInterval(fetchLeaderboard, 1500);
+         setInterval(fetchReferrals, 1500);
+       </script>
+     </body>
+     </html>
