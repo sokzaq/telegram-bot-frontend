@@ -116,9 +116,16 @@
           .join('');
         copyLinkButton.onclick = () => {
           const referralLink = `https://t.me/AFK2earn_bot?start=${userId}`;
+          console.log('Trying to copy referral link:', referralLink);
+          // Пробуем скопировать через clipboard
           navigator.clipboard.writeText(referralLink).then(() => {
+            console.log('Clipboard copy successful');
             copyMessage.classList.remove('hidden');
             setTimeout(() => copyMessage.classList.add('hidden'), 2000);
+          }).catch(err => {
+            console.error('Clipboard copy failed:', err);
+            // Альтернатива: показываем ссылку через prompt
+            prompt('Не удалось скопировать ссылку. Скопируйте её вручную:', referralLink);
           });
         };
       } catch (error) {
