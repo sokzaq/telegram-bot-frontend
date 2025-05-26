@@ -33,6 +33,20 @@
   </style>
 </head>
 <body>
+  <div class="introduction text-center p-6 bg-white shadow-md rounded-lg max-w-md mx-auto">
+    <h1 class="text-3xl font-bold text-gray-800 mb-4">Добро пожаловать в AFK2earn_bot!</h1>
+    <p class="text-lg text-gray-600 mb-2">Мы — не очередной кликер, который оставит вас без средств. Наш проект построен на прозрачности и честности, чтобы вы могли доверять нам!</p>
+    <p class="text-lg text-gray-600 mb-2">С выходом приложения мы будем открыто отчитываться о доходах и распределять средства следующим образом:</p>
+    <ul class="list-disc list-inside text-gray-600 mb-2">
+      <li>15% — на поддержку проекта,</li>
+      <li>15% — на развитие,</li>
+      <li>70% — в ликвидность токена.</li>
+    </ul>
+    <p class="text-lg text-gray-600 mb-2">Забудьте о бесконечных кликах! Вам достаточно просто зайти в приложение, и токены будут начисляться автоматически — даже если вы не активны.</p>
+    <p class="text-lg text-gray-600 mb-2">Хотите увеличить свой доход? Следите за нашими постами, приглашайте друзей и поддерживайте проект пожертвованиями. Наш доход основан на монетизации, а ваши усилия помогут нам расти вместе!</p>
+    <p class="text-md text-blue-500 mt-4">Присоединяйтесь к сообществу и начните зарабатывать уже сегодня!</p>
+  </div>
+
   <div id="main-content" class="tab-content active">
     <h1 class="text-4xl font-bold text-gray-800 mb-4">Баланс</h1>
     <p class="text-3xl text-gray-600"><span id="points">0.0000</span> $AFK</p>
@@ -60,14 +74,15 @@
 
     const userId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : Date.now().toString();
     const username = tg.initDataUnsafe?.user?.username || 'Anonymous';
-    const startParam = tg.initDataUnsafe?.start_param;
+    const startParam = tg.initDataUnsafe?.start_param || tg.initDataUnsafe?.startapp; // Поддержка start и startapp
     const pointsElement = document.getElementById('points');
     const leaderboardElement = document.getElementById('leaderboard');
     const referralsListElement = document.getElementById('referrals-list');
     const copyLinkButton = document.getElementById('copy-link');
     const copyMessage = document.getElementById('copy-message');
-    const serverUrl = 'https://telegram-bot-server-ixsp.onrender.com';
+    const serverUrl = 'https://telegram-bot-server-1xsp.onrender.com';
 
+    // Проверяем, есть ли параметр start или startapp, и активируем реферальную систему
     if (startParam && !localStorage.getItem('referralActivated')) {
       fetch(`${serverUrl}/start/${startParam}?userId=${userId}&username=${encodeURIComponent(username)}`).then(() => {
         localStorage.setItem('referralActivated', 'true');
@@ -115,7 +130,7 @@
           .map(referral => `<p>${referral.referralId}: ${referral.points.toFixed(4)} $AFK (Доход: ${referral.earnings.toFixed(4)} $AFK)</p>`)
           .join('');
         copyLinkButton.onclick = () => {
-          const referralLink = `https://t.me/AFK2earn_bot?start=${userId}`;
+          const referralLink = `https://t.me/AFK2earn_bot?startapp=${userId}`; // Используем startapp вместо start
           navigator.clipboard.writeText(referralLink).then(() => {
             copyMessage.classList.remove('hidden');
             setTimeout(() => copyMessage.classList.add('hidden'), 2000);
