@@ -43,6 +43,7 @@
   </div>
   <div id="referrals-content" class="tab-content">
     <h1 class="text-4xl font-bold text-gray-800 mb-4">Мои рефералы</h1>
+    <p class="text-xl text-gray-600 mb-4">Общий доход от рефералов: <span id="total-referral-earnings">0.0000</span> $AFK</p>
     <div id="referrals-list"></div>
     <button id="copy-link" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Скопировать реферальную ссылку</button>
     <p id="copy-message" class="mt-2 text-green-500 hidden">Ссылка скопирована!</p>
@@ -64,11 +65,11 @@
     const pointsElement = document.getElementById('points');
     const leaderboardElement = document.getElementById('leaderboard');
     const referralsListElement = document.getElementById('referrals-list');
+    const totalReferralEarningsElement = document.getElementById('total-referral-earnings');
     const copyLinkButton = document.getElementById('copy-link');
     const copyMessage = document.getElementById('copy-message');
-    const serverUrl = 'https://telegram-bot-server-ixsp.onrender.com';
+    const serverUrl = 'https://telegram-bot-server-1xsp.onrender.com';
 
-    // Проверяем, есть ли параметр start, и активируем реферальную систему
     if (startParam && !localStorage.getItem('referralActivated')) {
       fetch(`${serverUrl}/start/${startParam}?userId=${userId}&username=${encodeURIComponent(username)}`).then(() => {
         localStorage.setItem('referralActivated', 'true');
@@ -113,8 +114,9 @@
         const response = await fetch(`${serverUrl}/referrals/${userId}`);
         const data = await response.json();
         referralsListElement.innerHTML = data.referrals
-          .map(referral => `<p>${referral.referralId}: ${referral.points.toFixed(4)} $AFK (Доход: ${referral.earnings.toFixed(4)} $AFK)</p>`)
+          .map(referral => `<p>${referral.referralId}: ${referral.points.toFixed(4)} $AFK (Бонусный доход: ${referral.earnings.toFixed(4)} $AFK в секунду)</p>`)
           .join('');
+        totalReferralEarningsElement.textContent = data.totalReferralEarnings.toFixed(4);
         copyLinkButton.onclick = () => {
           const referralLink = `https://t.me/AFK2earn_bot?start=${userId}`;
           navigator.clipboard.writeText(referralLink).then(() => {
@@ -125,6 +127,7 @@
       } catch (error) {
         console.error('Error fetching referrals:', error);
         referralsListElement.innerHTML = '<p>Ошибка загрузки рефералов</p>';
+        totalReferralEarningsElement.textContent = '0.0000';
       }
     }
 
