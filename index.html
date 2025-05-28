@@ -47,7 +47,8 @@
     <div id="referrals-list"></div>
     <button id="copy-link" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Скопировать реферальную ссылку</button>
     <p id="copy-message" class="mt-2 text-green-500 hidden">Ссылка скопирована!</p>
-    <p id="copy-error" class="mt-2 text-red-500 hidden">Ошибка копирования!</p>
+    <p id="copy-error" class="mt-2 text-red-500 hidden">Ошибка копирования! Используйте ссылку ниже.</p>
+    <p id="referral-link-text" class="mt-2 text-gray-600 break-all"></p>
   </div>
   <div class="flex fixed bottom-0 w-full bg-gray-200">
     <div class="tab-button active" onclick="openTab('main')">Главная</div>
@@ -70,7 +71,11 @@
     const copyLinkButton = document.getElementById('copy-link');
     const copyMessage = document.getElementById('copy-message');
     const copyError = document.getElementById('copy-error');
+    const referralLinkText = document.getElementById('referral-link-text');
     const serverUrl = 'https://telegram-bot-server-1xsp.onrender.com';
+
+    const referralLink = `https://t.me/AFK2earn_bot?start=${userId}`;
+    referralLinkText.textContent = referralLink;
 
     if (startParam && !localStorage.getItem('referralActivated')) {
       fetch(`${serverUrl}/start/${startParam}?userId=${userId}&username=${encodeURIComponent(username)}`).then(() => {
@@ -112,9 +117,10 @@
     }
 
     async function fallbackCopyText(text) {
+      console.log('Attempting fallback copy method...');
       const textArea = document.createElement('textarea');
       textArea.value = text;
-      textArea.style.position = 'fixed'; // Избегаем прокрутки
+      textArea.style.position = 'fixed';
       textArea.style.top = '0';
       textArea.style.left = '0';
       textArea.style.opacity = '0';
@@ -127,7 +133,8 @@
           console.log('Fallback: Text copied to clipboard');
           return true;
         } else {
-          throw new Error('Fallback copy failed');
+          console.error('Fallback: Copy command failed');
+          return false;
         }
       } catch (err) {
         console.error('Fallback: Could not copy text', err);
@@ -137,6 +144,31 @@
       }
     }
 
+    copyLinkButton.onclick = async () => {
+      console.log('Copy button clicked, attempting to copy:', referralLink);
+      try {
+        await navigator.clipboard.writeText(referralLink);
+        console.log('navigator.clipboard: Text copied successfully');
+        copyMessage.classList.remove('hidden');
+        copyError.classList.add('hidden');
+        setTimeout(() => copyMessage.classList.add('hidden'), 2000);
+      } catch (err) {
+        console.error('Failed to copy using navigator.clipboard:', err);
+        const success = await fallbackCopyText(referralLink);
+        if (success) {
+          console.log('Fallback method: Text copied successfully');
+          copyMessage.classList.remove('hidden');
+          copyError.classList.add('hidden');
+          setTimeout(() => copyMessage.classList.add('hidden'), 2000);
+        } else {
+          console.error('Both copy methods failed');
+          copyError.classList.remove('hidden');
+          copyMessage.classList.add('hidden');
+          setTimeout(() => copyError.classList.add('hidden'), 2000);
+        }
+      }
+    };
+
     async function fetchReferrals() {
       try {
         const response = await fetch(`${serverUrl}/referrals/${userId}`);
@@ -145,29 +177,6 @@
           .map(referral => `<p>${referral.referralId}: ${referral.points.toFixed(4)} $AFK (Бонусный доход: ${referral.earnings.toFixed(4)} $AFK в секунду)</p>`)
           .join('');
         totalReferralEarningsElement.textContent = data.totalReferralEarnings.toFixed(4);
-        copyLinkButton.onclick = async () => {
-          const referralLink = `https://t.me/AFK2earn_bot?start=${userId}`;
-          try {
-            // Пробуем использовать navigator.clipboard
-            await navigator.clipboard.writeText(referralLink);
-            copyMessage.classList.remove('hidden');
-            copyError.classList.add('hidden');
-            setTimeout(() => copyMessage.classList.add('hidden'), 2000);
-          } catch (err) {
-            console.error('Failed to copy using navigator.clipboard:', err);
-            // Пробуем альтернативный метод
-            const success = await fallbackCopyText(referralLink);
-            if (success) {
-              copyMessage.classList.remove('hidden');
-              copyError.classList.add('hidden');
-              setTimeout(() => copyMessage.classList.add('hidden'), 2000);
-            } else {
-              copyError.classList.remove('hidden');
-              copyMessage.classList.add('hidden');
-              setTimeout(() => copyError.classList.add('hidden'), 2000);
-            }
-          }
-        };
       } catch (error) {
         console.error('Error fetching referrals:', error);
         referralsListElement.innerHTML = '<p>Ошибка загрузки рефералов</p>';
