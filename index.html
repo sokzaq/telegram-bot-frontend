@@ -63,7 +63,7 @@
 
     const userId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : Date.now().toString();
     const username = tg.initDataUnsafe?.user?.username || 'Anonymous';
-    const startParam = tg.initDataUnsafe?.start_param;
+    const startParam = tg.initDataUnsafe?.start_param || ''; // Извлечение параметра startapp
     const pointsElement = document.getElementById('points');
     const leaderboardElement = document.getElementById('leaderboard');
     const referralsListElement = document.getElementById('referrals-list');
@@ -74,13 +74,19 @@
     const referralLinkText = document.getElementById('referral-link-text');
     const serverUrl = 'https://telegram-bot-server-ixsp.onrender.com';
 
-    const referralLink = `https://t.me/AFK2earn_bot?start=${userId}`;
+    // Обновлённая реферальная ссылка с автозапуском Mini App
+    const referralLink = `t.me/AFK2earn_bot/AFK2earn?startapp=${userId}`;
     referralLinkText.textContent = referralLink;
 
+    // Активация реферала, если передан startapp параметр
     if (startParam && !localStorage.getItem('referralActivated')) {
-      fetch(`${serverUrl}/start/${startParam}?userId=${userId}&username=${encodeURIComponent(username)}`).then(() => {
-        localStorage.setItem('referralActivated', 'true');
-      });
+      fetch(`${serverUrl}/start/${startParam}?userId=${userId}&username=${encodeURIComponent(username)}`)
+        .then(response => {
+          if (!response.ok) throw new Error('Failed to activate referral');
+          localStorage.setItem('referralActivated', 'true');
+          console.log('Referral activated with code:', startParam);
+        })
+        .catch(err => console.error('Error activating referral:', err));
     }
 
     function openTab(tabName) {
@@ -174,7 +180,7 @@
         const response = await fetch(`${serverUrl}/referrals/${userId}`);
         const data = await response.json();
         referralsListElement.innerHTML = data.referrals
-          .map(referral => `<p>${referral.referralId}: ${referral.points.toFixed(4)} $AFK (Бонусный доход: ${referral.earnings.toFixed(4)} $AFK в секунду)</p>`)
+          .map(referral => `<p>${referral.referralId}: ${referral.points.toFixed(4)} $AFK (Бонусный доход: ${referral.expectations.toFixed(4)} $AFK в секунду)</p>`)
           .join('');
         totalReferralEarningsElement.textContent = data.totalReferralEarnings.toFixed(4);
       } catch (error) {
