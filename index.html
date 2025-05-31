@@ -10,46 +10,94 @@
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
-      background-color: #f5f5f5;
+      background-color: #1a1a1a; /* Тёмный фон */
+      color: #d1d5db; /* Светлый текст */
+      overscroll-behavior: none;
     }
     .tab-content {
       display: none;
-      padding: 20px;
+      padding: 24px;
       text-align: center;
+      min-height: calc(100vh - 64px); /* Учитываем высоту нижней панели */
+      transition: opacity 0.3s ease; /* Плавный переход */
     }
     .tab-content.active {
       display: block;
+      opacity: 1;
+    }
+    .tab-content:not(.active) {
+      opacity: 0;
     }
     .tab-button {
       flex: 1;
-      padding: 10px;
+      padding: 14px;
       text-align: center;
-      background-color: #e0e0e0;
+      background-color: #2d2d2d; /* Тёмно-серый для кнопок */
+      color: #d1d5db;
       cursor: pointer;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
     .tab-button.active {
-      background-color: #d0d0d0;
+      background-color: #3b82f6; /* Акцентный синий для активной вкладки */
+      color: #ffffff;
+    }
+    .tab-button:hover {
+      background-color: #3b82f6;
+      color: #ffffff;
+    }
+    .balance-card {
+      background-color: #2d2d2d;
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 20px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+    .referrals-list p {
+      background-color: #2d2d2d;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 8px 0;
+      font-size: 0.95rem;
+    }
+    .leaderboard-list p {
+      background-color: #2d2d2d;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 8px 0;
+      font-size: 0.95rem;
+    }
+    .copy-button {
+      background-color: #3b82f6;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: background-color 0.3s ease;
+    }
+    .copy-button:hover {
+      background-color: #2563eb;
     }
   </style>
 </head>
 <body>
   <div id="main-content" class="tab-content active">
-    <h1 class="text-4xl font-bold text-gray-800 mb-4">Баланс</h1>
-    <p class="text-3xl text-gray-600"><span id="points">0.0000</span> $AFK</p>
+    <h1 class="text-3xl font-semibold mb-6">Баланс</h1>
+    <div class="balance-card">
+      <p class="text-2xl"><span id="points">0.0000</span> $AFK</p>
+    </div>
   </div>
   <div id="leaderboard-content" class="tab-content">
-    <h1 class="text-4xl font-bold text-gray-800 mb-4">Топ</h1>
-    <div id="leaderboard" class="text-left"></div>
+    <h1 class="text-3xl font-semibold mb-6">Топ</h1>
+    <div id="leaderboard" class="leaderboard-list text-left max-w-md mx-auto"></div>
   </div>
   <div id="referrals-content" class="tab-content">
-    <h1 class="text-4xl font-bold text-gray-800 mb-4">Мои рефералы</h1>
-    <p class="text-xl text-gray-600 mb-4">Общий доход от рефералов: <span id="total-referral-earnings">0.0000</span> $AFK</p>
-    <div id="referrals-list"></div>
-    <button id="copy-link" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Скопировать реферальную ссылку</button>
-    <p id="copy-message" class="mt-2 text-green-500 hidden">Ссылка скопирована!</p>
-    <p id="copy-error" class="mt-2 text-red-500 hidden">Ошибка копирования! Используйте ссылку ниже.</p>
+    <h1 class="text-3xl font-semibold mb-6">Мои рефералы</h1>
+    <p class="text-lg mb-6">Общий доход от рефералов: <span id="total-referral-earnings">0.0000</span> $AFK</p>
+    <div id="referrals-list" class="referrals-list max-w-md mx-auto"></div>
+    <button id="copy-link" class="copy-button mt-6 text-white">Скопировать реферальную ссылку</button>
+    <p id="copy-message" class="mt-3 text-green-400 hidden">Ссылка скопирована!</p>
+    <p id="copy-error" class="mt-3 text-red-400 hidden">Ошибка копирования!</p>
   </div>
-  <div class="flex fixed bottom-0 w-full bg-gray-200">
+  <div class="flex fixed bottom-0 w-full bg-[#1a1a1a] shadow-lg">
     <div class="tab-button active" onclick="openTab('main')">Главная</div>
     <div class="tab-button" onclick="openTab('leaderboard')">Топ</div>
     <div class="tab-button" onclick="openTab('referrals')">Рефералы</div>
