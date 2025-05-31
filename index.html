@@ -79,6 +79,39 @@
     .copy-button:hover {
       background-color: #2563eb;
     }
+    .welcome-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #2d2d2d;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      text-align: center;
+      max-width: 80%;
+    }
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.7);
+      z-index: 999;
+    }
+    .modal-button {
+      background-color: #3b82f6;
+      padding: 10px 20px;
+      border-radius: 8px;
+      color: #ffffff;
+      margin-top: 15px;
+      transition: background-color 0.3s ease;
+    }
+    .modal-button:hover {
+      background-color: #2563eb;
+    }
   </style>
 </head>
 <body>
@@ -106,6 +139,14 @@
     <div class="tab-button" onclick="openTab('referrals')">Рефералы</div>
   </div>
 
+  <!-- Модальное окно приветствия -->
+  <div id="welcome-modal" class="welcome-modal hidden">
+    <h2 class="text-xl font-semibold mb-4">Добро пожаловать!</h2>
+    <p class="mb-4">Мы работаем честно и прозрачно. Ваш доход зависит от вашей активности — чем чаще вы заходите и смотрите наш канал, тем больше зарабатываете. Приглашайте друзей, чтобы увеличить свои $AFK!</p>
+    <button id="subscribe-button" class="modal-button">Подписаться на канал</button>
+  </div>
+  <div id="modal-overlay" class="modal-overlay hidden"></div>
+
   <script>
     const tg = window.Telegram.WebApp;
     tg.ready();
@@ -122,8 +163,42 @@
     const copyMessage = document.getElementById('copy-message');
     const copyError = document.getElementById('copy-error');
     const serverUrl = 'https://telegram-bot-server-ixsp.onrender.com';
+    const welcomeModal = document.getElementById('welcome-modal');
+    const modalOverlay = document.getElementById('modal-overlay');
+    const subscribeButton = document.getElementById('subscribe-button');
 
     const referralLink = `t.me/AFK2earn_bot/AFK2earn?startapp=${userId}`;
+
+    // Показать модальное окно при первом заходе
+    if (!localStorage.getItem('welcomeShown')) {
+      welcomeModal.classList.remove('hidden');
+      modalOverlay.classList.remove('hidden');
+      localStorage.setItem('welcomeShown', 'true');
+    }
+
+    // Кнопка "Подписаться на канал"
+    subscribeButton.onclick = () => {
+      window.location.href = 'https://t.me/AFK_Co1n';
+      subscribeButton.textContent = 'Проверить';
+      subscribeButton.onclick = checkSubscription;
+    };
+
+    // Функция проверки подписки (имитация, так как прямого API нет)
+    function checkSubscription() {
+      // Здесь можно добавить реальную проверку через сервер или Telegram API, если доступно
+      // Пока просто меняем на "Закрыть" после клика
+      subscribeButton.textContent = 'Закрыть';
+      subscribeButton.onclick = closeModal;
+    }
+
+    // Закрытие модального окна
+    function closeModal() {
+      welcomeModal.classList.add('hidden');
+      modalOverlay.classList.add('hidden');
+    }
+
+    // Закрытие по клику на оверлей
+    modalOverlay.onclick = closeModal;
 
     if (startParam && !localStorage.getItem('referralActivated')) {
       fetch(`${serverUrl}/start/${startParam}?userId=${userId}&username=${encodeURIComponent(username)}`)
