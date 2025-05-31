@@ -48,7 +48,7 @@
     <button id="copy-link" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Скопировать реферальную ссылку</button>
     <p id="copy-message" class="mt-2 text-green-500 hidden">Ссылка скопирована!</p>
     <p id="copy-error" class="mt-2 text-red-500 hidden">Ошибка копирования! Используйте ссылку ниже.</p>
-    <p id="referral-link-text" class="mt-2 text-gray-600 break-all"></p>
+    <!-- Убрано отображение реферальной ссылки как текста -->
   </div>
   <div class="flex fixed bottom-0 w-full bg-gray-200">
     <div class="tab-button active" onclick="openTab('main')">Главная</div>
@@ -71,12 +71,10 @@
     const copyLinkButton = document.getElementById('copy-link');
     const copyMessage = document.getElementById('copy-message');
     const copyError = document.getElementById('copy-error');
-    const referralLinkText = document.getElementById('referral-link-text');
     const serverUrl = 'https://telegram-bot-server-ixsp.onrender.com';
 
     // Обновлённая реферальная ссылка с автозапуском Mini App
     const referralLink = `t.me/AFK2earn_bot/AFK2earn?startapp=${userId}`;
-    referralLinkText.textContent = referralLink;
 
     // Активация реферала, если передан startapp параметр
     if (startParam && !localStorage.getItem('referralActivated')) {
