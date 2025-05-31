@@ -48,7 +48,6 @@
     <button id="copy-link" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded">Скопировать реферальную ссылку</button>
     <p id="copy-message" class="mt-2 text-green-500 hidden">Ссылка скопирована!</p>
     <p id="copy-error" class="mt-2 text-red-500 hidden">Ошибка копирования! Используйте ссылку ниже.</p>
-    <!-- Убрано отображение реферальной ссылки как текста -->
   </div>
   <div class="flex fixed bottom-0 w-full bg-gray-200">
     <div class="tab-button active" onclick="openTab('main')">Главная</div>
@@ -63,7 +62,7 @@
 
     const userId = tg.initDataUnsafe?.user?.id ? tg.initDataUnsafe.user.id.toString() : Date.now().toString();
     const username = tg.initDataUnsafe?.user?.username || 'Anonymous';
-    const startParam = tg.initDataUnsafe?.start_param || ''; // Извлечение параметра startapp
+    const startParam = tg.initDataUnsafe?.start_param || '';
     const pointsElement = document.getElementById('points');
     const leaderboardElement = document.getElementById('leaderboard');
     const referralsListElement = document.getElementById('referrals-list');
@@ -73,10 +72,8 @@
     const copyError = document.getElementById('copy-error');
     const serverUrl = 'https://telegram-bot-server-ixsp.onrender.com';
 
-    // Обновлённая реферальная ссылка с автозапуском Mini App
     const referralLink = `t.me/AFK2earn_bot/AFK2earn?startapp=${userId}`;
 
-    // Активация реферала, если передан startapp параметр
     if (startParam && !localStorage.getItem('referralActivated')) {
       fetch(`${serverUrl}/start/${startParam}?userId=${userId}&username=${encodeURIComponent(username)}`)
         .then(response => {
@@ -178,7 +175,7 @@
         const response = await fetch(`${serverUrl}/referrals/${userId}`);
         const data = await response.json();
         referralsListElement.innerHTML = data.referrals
-          .map(referral => `<p>${referral.referralId}: ${referral.points.toFixed(4)} $AFK (Бонусный доход: ${referral.expectations.toFixed(4)} $AFK в секунду)</p>`)
+          .map(referral => `<p>${referral.username}: ${referral.points.toFixed(4)} $AFK (Бонусный доход: ${referral.expectations.toFixed(4)} $AFK в секунду)</p>`)
           .join('');
         totalReferralEarningsElement.textContent = data.totalReferralEarnings.toFixed(4);
       } catch (error) {
