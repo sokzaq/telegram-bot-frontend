@@ -162,12 +162,12 @@
     const copyLinkButton = document.getElementById('copy-link');
     const copyMessage = document.getElementById('copy-message');
     const copyError = document.getElementById('copy-error');
-    const serverUrl = 'https://telegram-bot-server-ixsp.onrender.com';
     const welcomeModal = document.getElementById('welcome-modal');
     const modalOverlay = document.getElementById('modal-overlay');
     const subscribeButton = document.getElementById('subscribe-button');
 
     const referralLink = `t.me/AFK2earn_bot/AFK2earn?startapp=${userId}`;
+    const SERVER_URL = 'https://telegram-bot-server-ixsp.onrender.com';
 
     // Показать модальное окно при первом заходе
     if (!localStorage.getItem('welcomeShown')) {
@@ -183,12 +183,32 @@
       subscribeButton.onclick = checkSubscription;
     };
 
-    // Функция проверки подписки (имитация, так как прямого API нет)
-    function checkSubscription() {
-      // Здесь можно добавить реальную проверку через сервер или Telegram API, если доступно
-      // Пока просто меняем на "Закрыть" после клика
-      subscribeButton.textContent = 'Закрыть';
-      subscribeButton.onclick = closeModal;
+    // Проверка подписки
+    async function checkSubscription() {
+      try {
+        const response = await fetch(`${SERVER_URL}/check-subscription`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId })
+        });
+        const data = await response.json();
+
+        if (data.subscribed) {
+          subscribeButton.textContent = 'Закрыть';
+          subscribeButton.onclick = closeModal;
+        } else {
+          alert('Вы не подписаны на канал. Подпишитесь и попробуйте снова.');
+          subscribeButton.textContent = 'Подписаться на канал';
+          subscribeButton.onclick = () => {
+            window.location.href = 'https://t.me/AFK_Co1n';
+            subscribeButton.textContent = 'Проверить';
+            subscribeButton.onclick = checkSubscription;
+          };
+        }
+      } catch (error) {
+        console.error('Error checking subscription:', error);
+        alert('Ошибка проверки подписки. Попробуйте позже.');
+      }
     }
 
     // Закрытие модального окна
@@ -201,7 +221,7 @@
     modalOverlay.onclick = closeModal;
 
     if (startParam && !localStorage.getItem('referralActivated')) {
-      fetch(`${serverUrl}/start/${startParam}?userId=${userId}&username=${encodeURIComponent(username)}`)
+      fetch(`${SERVER_URL}/start/${startParam}?userId=${userId}&username=${encodeURIComponent(username)}`)
         .then(response => {
           if (!response.ok) throw new Error('Failed to activate referral');
           localStorage.setItem('referralActivated', 'true');
@@ -219,7 +239,7 @@
 
     async function fetchUserData() {
       try {
-        const response = await fetch(`${serverUrl}/user/${userId}?username=${encodeURIComponent(username)}`);
+        const response = await fetch(`${SERVER_URL}/user/${userId}?username=${encodeURIComponent(username)}`);
         const data = await response.json();
         if (data.error) {
           pointsElement.textContent = 'Ошибка: ' + data.error;
@@ -234,7 +254,7 @@
 
     async function fetchLeaderboard() {
       try {
-        const response = await fetch(`${serverUrl}/leaderboard`);
+        const response = await fetch(`${SERVER_URL}/leaderboard`);
         const data = await response.json();
         leaderboardElement.innerHTML = data.map((user, index) => `<p>${index + 1}. ${user.username}: ${user.points.toFixed(4)} $AFK</p>`).join('');
       } catch (error) {
@@ -298,7 +318,7 @@
 
     async function fetchReferrals() {
       try {
-        const response = await fetch(`${serverUrl}/referrals/${userId}`);
+        const response = await fetch(`${SERVER_URL}/referrals/${userId}`);
         const data = await response.json();
         referralsListElement.innerHTML = data.referrals
           .map(referral => `<p><span class="mr-4">${referral.username}</span><span>${referral.points.toFixed(4)} $AFK</span></p>`)
